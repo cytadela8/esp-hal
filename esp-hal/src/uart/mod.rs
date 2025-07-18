@@ -1168,6 +1168,34 @@ where
         self
     }
 
+    /// Enable break detection.
+    ///
+    /// This must be called before any breaks are expected to be received.
+    /// Break detection is enabled automatically by [`Self::wait_for_break`]
+    /// and [`Self::wait_for_break_with_timeout`], but calling this method
+    /// explicitly ensures that breaks occurring before the first wait call
+    /// will be reliably detected.
+    #[instability::unstable]
+    pub fn enable_break_detection(&mut self) {
+        self.uart
+            .info()
+            .enable_listen_rx(RxEvent::BreakDetected.into(), true);
+
+        #[cfg(any(esp32c6, esp32h2))]
+        sync_regs(self.regs());
+    }
+
+    /// Inverts the RX signal polarity when `inverted` is `true`.
+    #[instability::unstable]
+    pub fn with_polarity(self, inverted: bool) -> Self {
+        self.uart
+            .info()
+            .regs()
+            .conf0()
+            .modify(|_, w| w.rxd_inv().bit(inverted));
+
+        self
+    }
     /// Change the configuration.
     ///
     /// ## Errors
