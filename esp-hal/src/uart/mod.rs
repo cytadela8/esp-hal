@@ -794,6 +794,7 @@ where
     /// Enable RS485 mode
     pub fn with_rs485(self) -> Self {
         self.regs().rs485_conf().write(|w| w.rs485_en().set_bit());
+        sync_regs(self.regs());
         self
     }
 
